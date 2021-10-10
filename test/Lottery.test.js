@@ -70,7 +70,7 @@ describe('Lottery Contract', () => {
    it('only manager can call pickWinner', async () => {
       await lottery.methods.enter().send({
          from: accounts[1],
-         value: web3.utils.toWei("0.011", "ether"),
+         value: web3.utils.toWei("0.02", "ether"),
       });
 
       try {
@@ -82,5 +82,27 @@ describe('Lottery Contract', () => {
          console.log("manager is not accounts[0], catch block triggers");
          assert(false);
       }
+   });
+
+   it('sends money to the winner and resets the players array', async () =>{
+      await lottery.methods.enter().send({
+         from: accounts[0],
+         value: web3.utils.toWei("2", "ether"),
+      });
+
+      const initialBalance = await web3.eth.getBalance(accounts[0]);
+      await lottery.methods.pickWinner().send({ from: accounts[0] });
+      const finalBalance = await web3.eth.getBalance(accounts[0]);
+      const difference = finalBalance - initialBalance;
+
+      assert(difference > web3.utils.toWei('1.9', 'ether')); // the difference is slightly lower than 2 because of the gas
+
+      // checks the players array is empty after calling the pickWinner function
+      const players = await lottery.methods.getPlayers().call({ from: accounts[0] });
+      assert.equal(players.length, 0);
+
+      // checks the balance of the contract is 0 after calling the pickWinner function
+      const contractBalance = await web3.eth.getBalance(lottery.options.address);
+      assert.equal(contractBalance, 0);
    });
 });
