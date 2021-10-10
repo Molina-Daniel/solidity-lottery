@@ -61,14 +61,26 @@ describe('Lottery Contract', () => {
    });
 
    it('require a minimum amount of ether to enter', async () => {
+      await assert.rejects(lottery.methods.enter().send({
+         from: accounts[0],
+         value: 0
+      }));
+   });
+
+   it('only manager can call pickWinner', async () => {
+      await lottery.methods.enter().send({
+         from: accounts[1],
+         value: web3.utils.toWei("0.011", "ether"),
+      });
+
       try {
-         await lottery.methods.enter().send({
-            from: accounts[0],
-            value: 100
+         await lottery.methods.pickWinner().send({
+            from: accounts[0]
          });
-         assert(false);
+         console.log("manager is accounts[0], catch block skipped");
       } catch (err) {
-         assert(err);
-      };
+         console.log("manager is not accounts[0], catch block triggers");
+         assert(false);
+      }
    });
 });
