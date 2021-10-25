@@ -3,7 +3,7 @@ const Web3 = require("web3");
 const { interface, bytecode } = require("./compile");
 
 const provider = new HDWalletProvider(
-   'YOUR_12_MNEMONIC_ACCOUNT_WORDS',
+  'YOUR_12_MNEMONIC_ACCOUNT_WORDS',
   'YOUR_INFURA_RINKEBY_API_LINK'
   // I didn't upload mine for security reasons
 );
@@ -16,8 +16,9 @@ const deploy = async () => {
 
   const result = await new web3.eth.Contract(JSON.parse(interface))
     .deploy({ data: bytecode })
-    .send({ gas: "1000000", from: accounts[0] });
+    .send({ gas: '1000000', gasPrice: '5000000000', from: accounts[0] });
 
+  console.log(interface);
   console.log("Contract deployed to", result.options.address);
 };
 
